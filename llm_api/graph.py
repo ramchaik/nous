@@ -3,16 +3,15 @@ from langchain.schema import Document
 from langchain_core.output_parsers import StrOutputParser, JsonOutputParser
 from langgraph.graph import START, END, StateGraph
 
-from .config import URLS
-from .document_processor import load_and_split_documents
-from .embeddings import create_vectorstore
-from .retriever import create_retriever
+from config import TAVILY_API_KEY, URLS
+from document_processor import load_and_split_documents
+from embeddings import create_vectorstore
+from retriever import create_retriever
 
-from .llm import create_llm
-from .prompts import rag_prompt, grading_prompt
+from llm import create_llm
+from prompts import rag_prompt, grading_prompt
 
 from langchain_community.tools.tavily_search import TavilySearchResults
-from .config import TAVILY_API_KEY, URLS
 
 doc_splits = load_and_split_documents(URLS)
 vectorstore = create_vectorstore(doc_splits)
@@ -158,7 +157,6 @@ def decide_to_generate(state):
         return "search"
     else:
         return "generate"
-
 
 def add_nodes(workflow):
     workflow.add_node("retrieve", retrieve)
