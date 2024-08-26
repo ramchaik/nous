@@ -5,14 +5,14 @@ GOCLEAN=$(GOCMD) clean
 GOTEST=$(GOCMD) test
 GOGET=$(GOCMD) get
 
-BINARY_NAME=nous
+BINARY_NAME=nous_backend
 BINARY_UNIX=$(BINARY_NAME)_unix
 
 # Air
 AIR_CMD=air
 
 # Main package path
-MAIN_PATH=cmd/main.go
+MAIN_PATH=cmd/api/main.go
 
 # Build the project
 all: build
