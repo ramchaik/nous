@@ -1,0 +1,13 @@
+CREATE TABLE IF NOT EXISTS chat (
+    chat_id TEXT PRIMARY KEY,
+    text TEXT NOT NULL,
+    type TEXT CHECK(type IN ('agent', 'user')),
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TRIGGER IF NOT EXISTS update_chat_timestamp 
+AFTER UPDATE ON chat
+BEGIN
+    UPDATE chat SET updated_at = CURRENT_TIMESTAMP WHERE chat_id = NEW.chat_id;
+END;

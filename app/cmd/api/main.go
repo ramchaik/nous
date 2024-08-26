@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"nous/internal/config"
+	"nous/internal/database"
 	"nous/internal/server"
 )
 
@@ -13,8 +14,14 @@ func main() {
 		log.Fatalf("Failed to load configuration: %v", err)
 	}
 
-	s := server.New(cfg)
-	if err := s.Run(); err != nil {
-		log.Fatalf("Server failed to start: %v", err)
+	db, err := database.New("./nous.db")
+	if err != nil {
+		log.Fatalf("Failed to initialize database: %v", err)
+	}
+	defer db.Close()
+
+	srv := server.New(cfg, db)
+	if err := srv.Run(":8080"); err != nil {
+		log.Fatalf("Failed to run server: %v", err)
 	}
 }
