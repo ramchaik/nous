@@ -21,7 +21,7 @@ func main() {
 	defer db.Close()
 
 	srv := server.New(cfg, db)
-	if err := srv.Run(":8080"); err != nil {
+	if err := srv.Run(cfg.ServerAddr); err != nil {
 		log.Fatalf("Failed to run server: %v", err)
 	}
 }
