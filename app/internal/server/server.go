@@ -6,6 +6,7 @@ import (
 	"nous/internal/handlers"
 	"nous/internal/llmclient"
 	"nous/internal/store"
+	"nous/internal/ui"
 
 	"github.com/gin-gonic/gin"
 )
@@ -39,12 +40,14 @@ func (s *DefaultServer) SetupRoutes() {
 	s.router.Static("/static", s.config.StaticPath)
 	s.router.LoadHTMLGlob(s.config.TemplatesPath)
 
+	chatUIHandler := ui.NewChatUIHandler(s.llmClient)
+	homeUIHandler := ui.NewHomeUIHandler()
+
 	chatStore := store.NewChatStore(s.db.GetDB())
-	chatUIHandler := handlers.NewChatUIHandler(s.llmClient)
 	chatAPIHandler := handlers.NewChatAPIHandler(chatStore, s.llmClient)
 
 	// UI routes
-	s.router.GET("/", handlers.Home)
+	s.router.GET("/", homeUIHandler.RenderHomePage)
 	s.router.GET("/chat", chatUIHandler.RenderChatPage)
 	s.router.POST("/chat", chatUIHandler.HandleChatMessage)
 
@@ -53,7 +56,7 @@ func (s *DefaultServer) SetupRoutes() {
 	{
 		api.POST("/chats", chatAPIHandler.CreateChat)
 		api.GET("/chats/:id", chatAPIHandler.GetChat)
-		api.POST("/predict", chatAPIHandler.PredictResponse)
+		api.POST("/predict", chatAPIHandler.Predict)
 	}
 }
 
