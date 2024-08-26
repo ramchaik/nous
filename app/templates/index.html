@@ -28,8 +28,8 @@
     </header>
 
     <main class="flex-grow container mx-auto px-4 py-8 flex flex-col">
-        <div class="w-full max-w-2xl mx-auto mt-8"> <!-- Added mt-8 for top margin -->
-            <form action="/chat" method="GET" class="relative">
+        <div class="w-full max-w-2xl mx-auto mt-8">
+            <form id="search-form" action="/chat" method="GET" class="relative">
                 <input 
                     type="text" 
                     name="query" 
@@ -49,7 +49,15 @@
         </div>
     </main>
 
-    <footer class="bg-gray-800 py-4 mt-auto"> <!-- Added mt-auto to push footer to bottom -->
+    <!-- Overlay loader -->
+    <div id="overlay" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 z-50 flex justify-center items-center">
+        <div class="bg-gray-800 rounded-lg p-6 flex flex-col items-center">
+            <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-primary-500 mb-4"></div>
+            <p class="text-primary-300 font-semibold">Thinking...</p>
+        </div>
+    </div>
+
+    <footer class="bg-gray-800 py-4 mt-auto">
         <div class="container mx-auto px-4">
             <p class="text-center text-gray-400 text-sm">&copy; <span id="current-year"></span> Nous. All rights reserved.</p>
         </div>
@@ -57,6 +65,11 @@
 
     <script>
         document.getElementById('current-year').textContent = new Date().getFullYear();
+
+        // Show overlay on form submission
+        document.getElementById('search-form').addEventListener('submit', function(event) {
+            document.getElementById('overlay').classList.remove('hidden');
+        });
     </script>
 </body>
 </html>

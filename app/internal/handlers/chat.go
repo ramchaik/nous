@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
 
 	"nous/internal/llmclient"
@@ -20,36 +19,62 @@ type ChatHandler interface {
 	// DeleteChat(*gin.Context)
 }
 
-type DefaultChatHandler struct {
+type ChatAPIHandler struct {
 	store     store.ChatStore
 	llmClient llmclient.LLMClient
 }
 
-func NewChatHandler(store store.ChatStore, llmClient llmclient.LLMClient) ChatHandler {
-	return &DefaultChatHandler{
-		store:     store,
-		llmClient: llmClient,
-	}
+type ChatUIHandler struct {
+	llmClient llmclient.LLMClient
 }
 
-func (h *DefaultChatHandler) Chat(c *gin.Context) {
-	query := c.Query("query")
+func NewChatUIHandler(llmClient llmclient.LLMClient) *ChatUIHandler {
+	return &ChatUIHandler{llmClient: llmClient}
+}
 
-	predictResp, err := h.llmClient.Predict(query)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get prediction: " + err.Error()})
+func NewChatAPIHandler(store store.ChatStore, llmClient llmclient.LLMClient) *ChatAPIHandler {
+	return &ChatAPIHandler{store: store, llmClient: llmClient}
+}
+
+func (h *ChatUIHandler) RenderChatPage(c *gin.Context) {
+	query := c.Query("query")
+	if query == "" {
+		c.HTML(http.StatusOK, "chat.html", gin.H{})
 		return
 	}
 
-	fmt.Printf("Steps: %v\n", predictResp.Steps)
+	predictResp, err := h.llmClient.Predict(query)
+	if err != nil {
+		c.HTML(http.StatusInternalServerError, "error.html", gin.H{"error": "Failed to get prediction: " + err.Error()})
+		return
+	}
 
 	c.HTML(http.StatusOK, "chat.html", gin.H{
-		"query":    query,
-		"response": predictResp.Response,
+		"userMessage": query,
+		"botResponse": predictResp.Response,
 	})
 }
 
-func (h *DefaultChatHandler) CreateChat(c *gin.Context) {
+func (h *ChatUIHandler) HandleChatMessage(c *gin.Context) {
+	query := c.PostForm("query")
+	if query == "" {
+		c.String(http.StatusBadRequest, "Query is required")
+		return
+	}
+
+	predictResp, err := h.llmClient.Predict(query)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "Failed to get prediction: "+err.Error())
+		return
+	}
+
+	c.HTML(http.StatusOK, "chat_messages.html", gin.H{
+		"userMessage": query,
+		"botResponse": predictResp.Response,
+	})
+}
+
+func (h *ChatAPIHandler) CreateChat(c *gin.Context) {
 	var chat models.Chat
 	if err := c.ShouldBindJSON(&chat); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -64,7 +89,7 @@ func (h *DefaultChatHandler) CreateChat(c *gin.Context) {
 	c.JSON(http.StatusCreated, chat)
 }
 
-func (h *DefaultChatHandler) GetChat(c *gin.Context) {
+func (h *ChatAPIHandler) GetChat(c *gin.Context) {
 	chatID := c.Param("id")
 
 	chat, err := h.store.GetByID(chatID)
@@ -76,4 +101,20 @@ func (h *DefaultChatHandler) GetChat(c *gin.Context) {
 	c.JSON(http.StatusOK, chat)
 }
 
-// Implement UpdateChat and DeleteChat methods
+func (h *ChatAPIHandler) PredictResponse(c *gin.Context) {
+	var request struct {
+		Query string `json:"query" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	predictResp, err := h.llmClient.Predict(request.Query)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get prediction: " + err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, predictResp)
+}

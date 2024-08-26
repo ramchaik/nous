@@ -39,14 +39,22 @@ func (s *DefaultServer) SetupRoutes() {
 	s.router.Static("/static", s.config.StaticPath)
 	s.router.LoadHTMLGlob(s.config.TemplatesPath)
 
-	s.router.GET("/", handlers.Home)
-
 	chatStore := store.NewChatStore(s.db.GetDB())
-	chatHandler := handlers.NewChatHandler(chatStore, s.llmClient)
+	chatUIHandler := handlers.NewChatUIHandler(s.llmClient)
+	chatAPIHandler := handlers.NewChatAPIHandler(chatStore, s.llmClient)
 
-	s.router.GET("/chat", chatHandler.Chat)
-	s.router.POST("/chat", chatHandler.CreateChat)
-	s.router.GET("/chat/:id", chatHandler.GetChat)
+	// UI routes
+	s.router.GET("/", handlers.Home)
+	s.router.GET("/chat", chatUIHandler.RenderChatPage)
+	s.router.POST("/chat", chatUIHandler.HandleChatMessage)
+
+	// API routes
+	api := s.router.Group("/api")
+	{
+		api.POST("/chats", chatAPIHandler.CreateChat)
+		api.GET("/chats/:id", chatAPIHandler.GetChat)
+		api.POST("/predict", chatAPIHandler.PredictResponse)
+	}
 }
 
 func (s *DefaultServer) Run(addr string) error {
