@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 
 	"nous/internal/llmclient"
@@ -39,6 +40,8 @@ func (h *DefaultChatHandler) Chat(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get prediction: " + err.Error()})
 		return
 	}
+
+	fmt.Printf("Steps: %v\n", predictResp.Steps)
 
 	c.HTML(http.StatusOK, "chat.html", gin.H{
 		"query":    query,
