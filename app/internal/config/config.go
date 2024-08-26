@@ -10,6 +10,7 @@ type Config struct {
 	TemplatesPath string
 	ServerAddr    string
 	DatabasePath  string
+	LLMBaseURL    string
 }
 
 func Load() (*Config, error) {
@@ -24,5 +25,6 @@ func Load() (*Config, error) {
 		TemplatesPath: filepath.Join(exPath, "..", "templates", "*"),
 		ServerAddr:    ":8080",
 		DatabasePath:  "./nous.db",
+		LLMBaseURL:    "http://localhost:5000",
 	}, nil
 }

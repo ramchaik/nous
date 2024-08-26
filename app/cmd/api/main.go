@@ -5,6 +5,7 @@ import (
 
 	"nous/internal/config"
 	"nous/internal/database"
+	"nous/internal/llmclient"
 	"nous/internal/server"
 )
 
@@ -20,7 +21,9 @@ func main() {
 	}
 	defer db.Close()
 
-	srv := server.New(cfg, db)
+	llmClient := llmclient.NewClient(cfg.LLMBaseURL, nil)
+
+	srv := server.New(cfg, db, llmClient)
 	if err := srv.Run(cfg.ServerAddr); err != nil {
 		log.Fatalf("Failed to run server: %v", err)
 	}

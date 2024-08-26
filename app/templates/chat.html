@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" class="dark">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,13 +13,14 @@
             theme: {
                 extend: {
                     colors: {
-                        primary: {"50":"#f0f9ff","100":"#e0f2fe","200":"#bae6fd","300":"#7dd3fc","400":"#38bdf8","500":"#0ea5e9","600":"#0284c7","700":"#0369a1","800":"#075985","900":"#0c4a6e","950":"#082f49"}
+                        primary: { "50": "#f0f9ff", "100": "#e0f2fe", "200": "#bae6fd", "300": "#7dd3fc", "400": "#38bdf8", "500": "#0ea5e9", "600": "#0284c7", "700": "#0369a1", "800": "#075985", "900": "#0c4a6e", "950": "#082f49" }
                     }
                 }
             }
         }
     </script>
 </head>
+
 <body class="bg-gray-900 text-gray-100 min-h-screen flex flex-col">
     <header class="bg-gray-800 py-4">
         <div class="container mx-auto px-4">
@@ -35,39 +37,27 @@
                         <p>{{.query}}</p>
                     </div>
                 </div>
-                
+
                 <!-- LLM response -->
                 <div class="flex justify-start">
                     <div class="bg-gray-700 text-white p-3 rounded-lg max-w-3/4">
-                        <p>Certainly! The history of Artificial Intelligence (AI) dates back to the 1950s, although the concept of intelligent machines has been around for much longer. Here's a brief overview:</p>
-                        <ul class="list-disc pl-5 mt-2">
-                            <li>1950s: The term "Artificial Intelligence" was coined by John McCarthy. The Dartmouth Conference marked the birth of AI as a field.</li>
-                            <li>1960s-70s: Early AI research focused on problem-solving and symbolic methods. This period saw the development of expert systems.</li>
-                            <li>1980s: AI winter began due to limitations of existing approaches and reduced funding.</li>
-                            <li>1990s-2000s: Machine learning gained popularity, especially with the advent of the internet and big data.</li>
-                            <li>2010s-present: Deep learning and neural networks have led to significant breakthroughs in areas like image and speech recognition, natural language processing, and game-playing AI.</li>
-                        </ul>
-                        <p class="mt-2">Today, AI is a rapidly evolving field with applications in various industries, from healthcare to finance to autonomous vehicles.</p>
+                        {{.response}}
                     </div>
                 </div>
             </div>
         </div>
-        
+
         <div class="w-full max-w-2xl mx-auto">
             <form hx-post="/chat" hx-target="#chat-messages" hx-swap="beforeend" class="relative">
-                <input 
-                    type="text" 
-                    name="query" 
-                    placeholder="Ask me anything..." 
+                <input type="text" name="query" placeholder="Ask me anything..."
                     class="w-full py-4 px-6 bg-gray-800 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 transition duration-300 shadow-lg"
-                    required
-                >
-                <button 
-                    type="submit"
-                    class="absolute right-3 top-1/2 transform -translate-y-1/2 bg-primary-600 text-white p-2 rounded-full hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 transition duration-300"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    required>
+                <button type="submit"
+                    class="absolute right-3 top-1/2 transform -translate-y-1/2 bg-primary-600 text-white p-2 rounded-full hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 transition duration-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                 </button>
             </form>
@@ -76,7 +66,8 @@
 
     <footer class="bg-gray-800 py-3">
         <div class="container mx-auto px-4">
-            <p class="text-center text-gray-400 text-sm">&copy; <span id="current-year"></span> Nous. All rights reserved.</p>
+            <p class="text-center text-gray-400 text-sm">&copy; <span id="current-year"></span> Nous. All rights
+                reserved.</p>
         </div>
     </footer>
 
@@ -84,4 +75,5 @@
         document.getElementById('current-year').textContent = new Date().getFullYear();
     </script>
 </body>
+
 </html>

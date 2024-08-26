@@ -4,6 +4,7 @@ import (
 	"nous/internal/config"
 	"nous/internal/database"
 	"nous/internal/handlers"
+	"nous/internal/llmclient"
 	"nous/internal/store"
 
 	"github.com/gin-gonic/gin"
@@ -15,16 +16,18 @@ type Server interface {
 }
 
 type DefaultServer struct {
-	router *gin.Engine
-	config *config.Config
-	db     database.Database
+	router    *gin.Engine
+	config    *config.Config
+	db        database.Database
+	llmClient llmclient.LLMClient
 }
 
-func New(cfg *config.Config, db database.Database) Server {
+func New(cfg *config.Config, db database.Database, llmClient llmclient.LLMClient) Server {
 	s := &DefaultServer{
-		router: gin.Default(),
-		config: cfg,
-		db:     db,
+		router:    gin.Default(),
+		config:    cfg,
+		db:        db,
+		llmClient: llmClient,
 	}
 
 	s.SetupRoutes()
@@ -39,7 +42,7 @@ func (s *DefaultServer) SetupRoutes() {
 	s.router.GET("/", handlers.Home)
 
 	chatStore := store.NewChatStore(s.db.GetDB())
-	chatHandler := handlers.NewChatHandler(chatStore)
+	chatHandler := handlers.NewChatHandler(chatStore, s.llmClient)
 
 	s.router.GET("/chat", chatHandler.Chat)
 	s.router.POST("/chat", chatHandler.CreateChat)

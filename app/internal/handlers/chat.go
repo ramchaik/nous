@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 
+	"nous/internal/llmclient"
 	"nous/internal/models"
 	"nous/internal/store"
 
@@ -19,17 +20,29 @@ type ChatHandler interface {
 }
 
 type DefaultChatHandler struct {
-	store store.ChatStore
+	store     store.ChatStore
+	llmClient llmclient.LLMClient
 }
 
-func NewChatHandler(store store.ChatStore) ChatHandler {
-	return &DefaultChatHandler{store: store}
+func NewChatHandler(store store.ChatStore, llmClient llmclient.LLMClient) ChatHandler {
+	return &DefaultChatHandler{
+		store:     store,
+		llmClient: llmClient,
+	}
 }
 
 func (h *DefaultChatHandler) Chat(c *gin.Context) {
 	query := c.Query("query")
+
+	predictResp, err := h.llmClient.Predict(query)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get prediction: " + err.Error()})
+		return
+	}
+
 	c.HTML(http.StatusOK, "chat.html", gin.H{
-		"query": query,
+		"query":    query,
+		"response": predictResp.Response,
 	})
 }
 
