@@ -9,6 +9,7 @@ type Config struct {
 	StaticPath    string
 	TemplatesPath string
 	Port          string
+	DatabasePath  string
 }
 
 func Load() (*Config, error) {
@@ -22,5 +23,6 @@ func Load() (*Config, error) {
 		StaticPath:    filepath.Join(exPath, "..", "static"),
 		TemplatesPath: filepath.Join(exPath, "..", "templates", "*"),
 		Port:          ":8080",
+		DatabasePath:  "./nous.db",
 	}, nil
 }

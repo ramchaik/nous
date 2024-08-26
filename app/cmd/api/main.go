@@ -14,7 +14,7 @@ func main() {
 		log.Fatalf("Failed to load configuration: %v", err)
 	}
 
-	db, err := database.New("./nous.db")
+	db, err := database.New(cfg.DatabasePath)
 	if err != nil {
 		log.Fatalf("Failed to initialize database: %v", err)
 	}
