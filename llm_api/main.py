@@ -1,8 +1,11 @@
+import os
 import uuid
 from langchain_core.output_parsers import StrOutputParser, JsonOutputParser
 from graph import create_workflow
 
 custom_graph = create_workflow()
+
+os.environ['USER_AGENT'] = 'Nous_LLM/1.0'
 
 class LangChainModel:
     @staticmethod
