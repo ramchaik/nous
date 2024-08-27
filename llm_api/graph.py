@@ -6,8 +6,6 @@ from functools import lru_cache
 import time
 import logging
 import concurrent.futures
-import hashlib
-from functools import partial
 
 from config import TAVILY_API_KEY, URLS
 from document_processor import load_and_split_documents
@@ -27,9 +25,9 @@ doc_splits = load_and_split_documents(URLS)
 vectorstore = create_vectorstore(doc_splits)
 retriever = create_retriever(vectorstore)
 
-llm = create_llm()
+llm = create_llm(model="phi3:mini")
 rag_chain = rag_prompt | llm | StrOutputParser()
-retrieval_grader = grading_prompt | create_llm(model="phi3:mini", format="json") | JsonOutputParser()
+retrieval_grader = grading_prompt | create_llm(model="saikatkumardey/tinyllama", format="json") | JsonOutputParser()
 
 web_search_tool = TavilySearchResults(api_key=TAVILY_API_KEY)
 
