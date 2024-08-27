@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 
+	"nous/internal/cache"
 	"nous/internal/config"
 	"nous/internal/database"
 	"nous/internal/llmclient"
@@ -21,7 +22,9 @@ func main() {
 	}
 	defer db.Close()
 
-	llmClient := llmclient.NewClient(cfg.LLMBaseURL, nil)
+	redisCache := cache.NewRedisCache(cfg.RedisAddr)
+
+	llmClient := llmclient.NewClient(cfg.LLMBaseURL, nil, redisCache)
 
 	srv := server.New(cfg, db, llmClient)
 	if err := srv.Run(cfg.ServerAddr); err != nil {

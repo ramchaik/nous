@@ -28,7 +28,7 @@ func (h *ChatUIHandler) RenderChatPage(c *gin.Context) {
 		return
 	}
 
-	predictResp, err := h.llmClient.Predict(query)
+	predictResp, err := h.llmClient.Predict(c.Request.Context(), query)
 	if err != nil {
 		c.HTML(http.StatusInternalServerError, "error.html", gin.H{"error": "Failed to get prediction: " + err.Error()})
 		return
@@ -47,7 +47,7 @@ func (h *ChatUIHandler) HandleChatMessage(c *gin.Context) {
 		return
 	}
 
-	predictResp, err := h.llmClient.Predict(query)
+	predictResp, err := h.llmClient.Predict(c.Request.Context(), query)
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Failed to get prediction: "+err.Error())
 		return

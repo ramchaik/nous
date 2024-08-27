@@ -64,7 +64,7 @@ func (h *ChatAPIHandler) Predict(c *gin.Context) {
 		return
 	}
 
-	predictResp, err := h.llmClient.Predict(request.Query)
+	predictResp, err := h.llmClient.Predict(c.Request.Context(), request.Query)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get prediction: " + err.Error()})
 		return

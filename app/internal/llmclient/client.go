@@ -2,14 +2,17 @@ package llmclient
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
+	"nous/internal/cache"
+	"time"
 )
 
 type LLMClient interface {
-	Predict(question string) (*PredictResponse, error)
+	Predict(ctx context.Context, question string) (*PredictResponse, error)
 }
 
 type HTTPClient interface {
@@ -18,7 +21,8 @@ type HTTPClient interface {
 
 type Client struct {
 	BaseURL    string
-	HTTPClient *http.Client
+	HTTPClient HTTPClient
+	Cache      cache.Cacher
 }
 
 type PredictRequest struct {
@@ -30,17 +34,32 @@ type PredictResponse struct {
 	Steps    []string `json:"steps"`
 }
 
-func NewClient(baseURL string, httpClient HTTPClient) LLMClient {
+func NewClient(baseURL string, httpClient HTTPClient, cache cache.Cacher) LLMClient {
 	if httpClient == nil {
 		httpClient = &http.Client{}
 	}
 	return &Client{
 		BaseURL:    baseURL,
 		HTTPClient: &http.Client{},
+		Cache:      cache,
 	}
 }
 
-func (c *Client) Predict(question string) (*PredictResponse, error) {
+func (c *Client) Predict(ctx context.Context, question string) (*PredictResponse, error) {
+	// Hash the cache key
+	cacheKey := c.Cache.HashKey(fmt.Sprintf("predict:%s", question))
+
+	// Try to get from cache
+	cachedResponse, err := c.Cache.GetCompressed(ctx, cacheKey)
+	if err == nil {
+		var predictResp PredictResponse
+		err = json.Unmarshal(cachedResponse, &predictResp)
+		if err == nil {
+			return &predictResp, nil
+		}
+	}
+
+	// Cache miss, proceed with API call
 	reqBody := PredictRequest{
 		Question: question,
 	}
@@ -49,7 +68,7 @@ func (c *Client) Predict(question string) (*PredictResponse, error) {
 		return nil, fmt.Errorf("error marshalling request body: %v", err)
 	}
 
-	req, err := http.NewRequest("POST", c.BaseURL+"/predict", bytes.NewBuffer(jsonBody))
+	req, err := http.NewRequestWithContext(ctx, "POST", c.BaseURL+"/predict", bytes.NewBuffer(jsonBody))
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %v", err)
 	}
@@ -74,6 +93,12 @@ func (c *Client) Predict(question string) (*PredictResponse, error) {
 	err = json.Unmarshal(body, &predictResp)
 	if err != nil {
 		return nil, fmt.Errorf("error unmarshaling response body: %v", err)
+	}
+
+	// Cache the response
+	jsonResponse, err := json.Marshal(predictResp)
+	if err == nil {
+		c.Cache.SetCompressed(ctx, cacheKey, jsonResponse, time.Hour) // Cache for 1 hour
 	}
 
 	return &predictResp, nil

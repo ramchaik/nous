@@ -11,6 +11,7 @@ type Config struct {
 	ServerAddr    string
 	DatabasePath  string
 	LLMBaseURL    string
+	RedisAddr     string
 }
 
 func Load() (*Config, error) {
@@ -26,5 +27,6 @@ func Load() (*Config, error) {
 		ServerAddr:    ":8080",
 		DatabasePath:  "./nous.db",
 		LLMBaseURL:    "http://localhost:5000",
+		RedisAddr:     "localhost:6379",
 	}, nil
 }
