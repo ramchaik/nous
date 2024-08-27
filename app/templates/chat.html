@@ -116,7 +116,6 @@
                 btn.addEventListener('click', function () {
                     const text = this.parentElement.querySelector('p').textContent;
                     navigator.clipboard.writeText(text).then(() => {
-                        // Show a brief "Copied!" message
                         const originalHTML = this.innerHTML;
                         this.innerHTML = '<span class="text-xs">Copied!</span>';
                         setTimeout(() => {
