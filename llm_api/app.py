@@ -1,3 +1,4 @@
+import traceback
 from flask import Flask, request, jsonify
 from main import LangChainModel
 
@@ -17,6 +18,7 @@ def predict():
         
         return jsonify(result)
     except Exception as e:
+        print(traceback.format_exc())
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':

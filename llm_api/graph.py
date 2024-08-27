@@ -27,7 +27,7 @@ retriever = create_retriever(vectorstore)
 
 llm = create_llm(model="phi3:mini")
 rag_chain = rag_prompt | llm | StrOutputParser()
-retrieval_grader = grading_prompt | create_llm(model="saikatkumardey/tinyllama", format="json") | JsonOutputParser()
+retrieval_grader = grading_prompt | create_llm(model="tinyllama", format="json") | JsonOutputParser()
 
 web_search_tool = TavilySearchResults(api_key=TAVILY_API_KEY)
 
@@ -51,6 +51,10 @@ def retrieve(state: GraphState) -> GraphState:
     state["steps"].append("retrieve_documents")
     logger.info(f"Retrieve time: {time.time() - start_time:.2f} seconds")
     return state
+
+@lru_cache(maxsize=100)
+def cached_rag_chain_invoke(documents, question):
+    return rag_chain.invoke({"documents": documents, "question": question})
 
 def generate(state: GraphState) -> GraphState:
     start_time = time.time()
@@ -87,7 +91,7 @@ def grade_documents(state: GraphState) -> GraphState:
             if len(filtered_docs) >= 5: # Top 5 docs 
                 break
 
-    state["documents"] = filtered_docs[:3]  # Limit to top 3 relevant documents
+    state["documents"] = filtered_docs[:5]  # Limit to top 5 relevant documents
     state["search"] = "Yes" if search_needed and len(filtered_docs) < 3 else "No"
     state["steps"].append("grade_document_retrieval")
     logger.info(f"Grade documents time: {time.time() - start_time:.2f} seconds")
@@ -102,7 +106,7 @@ def web_search(state: GraphState) -> GraphState:
     return state
 
 def decide_to_generate(state: GraphState) -> str:
-    return "search" if state["search"] == "Yes" and len(state["documents"]) < 3 else "generate"
+    return "search" if state.get("search") == "Yes" and len(state["documents"]) < 3 else "generate"
 
 
 def add_nodes(workflow: StateGraph):
