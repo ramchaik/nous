@@ -178,7 +178,7 @@ func (c *Client) getAllUncompressedResponses(ctx context.Context) ([]CachedRespo
 
 func (c *Client) getCachedResponse(ctx context.Context, questionHash string) (*CachedResponse, error) {
 	cacheKey := fmt.Sprintf("predict:%s", questionHash)
-	cachedData, err := c.Cache.GetCompressed(ctx, cacheKey)
+	cachedData, err := c.Cache.GetUncompressed(ctx, cacheKey)
 	if err != nil {
 		return nil, err
 	}

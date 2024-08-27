@@ -15,7 +15,7 @@ import (
 type Cacher interface {
 	Get(ctx context.Context, key string) ([]byte, error)
 	Set(ctx context.Context, key string, value []byte, expiration time.Duration) error
-	GetCompressed(ctx context.Context, key string) ([]byte, error)
+	GetUncompressed(ctx context.Context, key string) ([]byte, error)
 	SetCompressed(ctx context.Context, key string, value []byte, expiration time.Duration) error
 	HashKey(key string) string
 	GetAllValues(ctx context.Context, pattern string) ([][]byte, error)
@@ -40,7 +40,7 @@ func (rc *RedisCache) Set(ctx context.Context, key string, value []byte, expirat
 	return rc.client.Set(ctx, key, value, expiration).Err()
 }
 
-func (rc *RedisCache) GetCompressed(ctx context.Context, key string) ([]byte, error) {
+func (rc *RedisCache) GetUncompressed(ctx context.Context, key string) ([]byte, error) {
 	compressed, err := rc.Get(ctx, key)
 	if err != nil {
 		return nil, err
