@@ -15,10 +15,11 @@ import (
 type Cacher interface {
 	Get(ctx context.Context, key string) ([]byte, error)
 	Set(ctx context.Context, key string, value []byte, expiration time.Duration) error
-	GetUncompressed(ctx context.Context, key string) ([]byte, error)
+	GetDecompressed(ctx context.Context, key string) ([]byte, error)
 	SetCompressed(ctx context.Context, key string, value []byte, expiration time.Duration) error
 	HashKey(key string) string
 	GetAllValues(ctx context.Context, pattern string) ([][]byte, error)
+	GetAllDecompressedValues(ctx context.Context, pattern string) ([][]byte, error)
 }
 
 type RedisCache struct {
@@ -40,7 +41,7 @@ func (rc *RedisCache) Set(ctx context.Context, key string, value []byte, expirat
 	return rc.client.Set(ctx, key, value, expiration).Err()
 }
 
-func (rc *RedisCache) GetUncompressed(ctx context.Context, key string) ([]byte, error) {
+func (rc *RedisCache) GetDecompressed(ctx context.Context, key string) ([]byte, error) {
 	compressed, err := rc.Get(ctx, key)
 	if err != nil {
 		return nil, err
@@ -82,6 +83,23 @@ func (rc *RedisCache) GetAllValues(ctx context.Context, pattern string) ([][]byt
 	var values [][]byte
 	for _, key := range keys {
 		value, err := rc.Get(ctx, key)
+		if err == nil {
+			values = append(values, value)
+		}
+	}
+
+	return values, nil
+}
+
+func (rc *RedisCache) GetAllDecompressedValues(ctx context.Context, pattern string) ([][]byte, error) {
+	keys, err := rc.client.Keys(ctx, pattern).Result()
+	if err != nil {
+		return nil, err
+	}
+
+	var values [][]byte
+	for _, key := range keys {
+		value, err := rc.GetDecompressed(ctx, key)
 		if err == nil {
 			values = append(values, value)
 		}

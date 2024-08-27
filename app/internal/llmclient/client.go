@@ -101,8 +101,8 @@ func (c *Client) findCachedResponse(ctx context.Context, questionHash, normalize
 		return similarResp, nil
 	}
 
-	// If no similar questions found, check uncompressed values
-	return c.findSimilarUncompressedResponse(ctx, normalizedQuestion)
+	// If no similar questions found, check decompressed values
+	return c.findSimilarDecompressedResponse(ctx, normalizedQuestion)
 }
 
 func (c *Client) generateQuestionHash(question string) string {
@@ -126,8 +126,8 @@ func (c *Client) findSimilarQuestion(ctx context.Context, question string) (*Cac
 	return nil, fmt.Errorf("no similar questions found")
 }
 
-func (c *Client) findSimilarUncompressedResponse(ctx context.Context, question string) (*CachedResponse, error) {
-	allResponses, err := c.getAllUncompressedResponses(ctx)
+func (c *Client) findSimilarDecompressedResponse(ctx context.Context, question string) (*CachedResponse, error) {
+	allResponses, err := c.getAllDecompressedResponses(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -157,9 +157,9 @@ func (c *Client) getAllQuestions(ctx context.Context) ([]QuestionIndex, error) {
 	return questionIndex, nil
 }
 
-func (c *Client) getAllUncompressedResponses(ctx context.Context) ([]CachedResponse, error) {
+func (c *Client) getAllDecompressedResponses(ctx context.Context) ([]CachedResponse, error) {
 	pattern := "predict:*"
-	cachedData, err := c.Cache.GetAllValues(ctx, pattern)
+	cachedData, err := c.Cache.GetAllDecompressedValues(ctx, pattern)
 	if err != nil {
 		return nil, err
 	}
@@ -178,7 +178,7 @@ func (c *Client) getAllUncompressedResponses(ctx context.Context) ([]CachedRespo
 
 func (c *Client) getCachedResponse(ctx context.Context, questionHash string) (*CachedResponse, error) {
 	cacheKey := fmt.Sprintf("predict:%s", questionHash)
-	cachedData, err := c.Cache.GetUncompressed(ctx, cacheKey)
+	cachedData, err := c.Cache.GetDecompressed(ctx, cacheKey)
 	if err != nil {
 		return nil, err
 	}
