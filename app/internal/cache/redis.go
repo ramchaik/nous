@@ -18,6 +18,7 @@ type Cacher interface {
 	GetCompressed(ctx context.Context, key string) ([]byte, error)
 	SetCompressed(ctx context.Context, key string, value []byte, expiration time.Duration) error
 	HashKey(key string) string
+	GetAllValues(ctx context.Context, pattern string) ([][]byte, error)
 }
 
 type RedisCache struct {
@@ -70,4 +71,21 @@ func (rc *RedisCache) HashKey(key string) string {
 	hasher := sha256.New()
 	hasher.Write([]byte(key))
 	return hex.EncodeToString(hasher.Sum(nil))
+}
+
+func (rc *RedisCache) GetAllValues(ctx context.Context, pattern string) ([][]byte, error) {
+	keys, err := rc.client.Keys(ctx, pattern).Result()
+	if err != nil {
+		return nil, err
+	}
+
+	var values [][]byte
+	for _, key := range keys {
+		value, err := rc.Get(ctx, key)
+		if err == nil {
+			values = append(values, value)
+		}
+	}
+
+	return values, nil
 }
