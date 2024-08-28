@@ -1,10 +1,13 @@
+{{if .userMessage}}
 <!-- User message -->
 <div class="flex justify-end">
     <div class="bg-primary-600 text-white p-3 rounded-lg max-w-3/4 relative group">
         <p>{{.userMessage}}</p>
     </div>
 </div>
+{{end}}
 
+{{if .botResponse}}
 <!-- LLM response -->
 <div class="flex justify-start">
     <div class="bg-gray-700 text-white p-3 rounded-lg max-w-3/4 relative group">
@@ -19,3 +22,4 @@
         </button>
     </div>
 </div>
+{{end}}

@@ -35,7 +35,7 @@ func (h *ChatAPIHandler) CreateChat(c *gin.Context) {
 		return
 	}
 
-	if err := h.store.Create(&chat); err != nil {
+	if err := h.store.CreateChat(&chat); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -46,7 +46,7 @@ func (h *ChatAPIHandler) CreateChat(c *gin.Context) {
 func (h *ChatAPIHandler) GetChat(c *gin.Context) {
 	chatID := c.Param("id")
 
-	chat, err := h.store.GetByID(chatID)
+	chat, err := h.store.GetByChatID(chatID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Chat not found"})
 		return
@@ -64,7 +64,7 @@ func (h *ChatAPIHandler) Predict(c *gin.Context) {
 		return
 	}
 
-	predictResp, err := h.llmClient.Predict(c.Request.Context(), request.Query)
+	predictResp, err := h.llmClient.Predict(c.Request.Context(), request.Query, []llmclient.ChatMessage{})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get prediction: " + err.Error()})
 		return

@@ -17,7 +17,7 @@ import (
 )
 
 type LLMClient interface {
-	Predict(ctx context.Context, question string) (*PredictResponse, error)
+	Predict(ctx context.Context, question string, chatHistory []ChatMessage) (*PredictResponse, error)
 }
 
 type HTTPClient interface {
@@ -30,8 +30,21 @@ type Client struct {
 	Cache      cache.Cacher
 }
 
+// ChatMessage represents a single message in the chat history
+type ChatMessage struct {
+	Role    string `json:"role"`
+	Content string `json:"content"`
+}
+
+// ChatSession represents a chat session with history
+type ChatSession struct {
+	ID      string        `json:"id"`
+	History []ChatMessage `json:"history"`
+}
+
 type PredictRequest struct {
-	Question string `json:"question"`
+	Question    string        `json:"question"`
+	ChatHistory []ChatMessage `json:"chat_history"`
 }
 
 type PredictResponse struct {
@@ -60,7 +73,7 @@ func NewClient(baseURL string, httpClient HTTPClient, cache cache.Cacher) LLMCli
 	}
 }
 
-func (c *Client) Predict(ctx context.Context, question string) (*PredictResponse, error) {
+func (c *Client) Predict(ctx context.Context, question string, chatHistory []ChatMessage) (*PredictResponse, error) {
 	normalizedQuestion := strings.ToLower(strings.TrimSpace(question))
 	questionHash := c.generateQuestionHash(normalizedQuestion)
 
@@ -71,7 +84,7 @@ func (c *Client) Predict(ctx context.Context, question string) (*PredictResponse
 	}
 
 	// No cached response found, proceed with API call
-	predictResp, err := c.makeAPICall(ctx, question)
+	predictResp, err := c.makeAPICall(ctx, question, chatHistory)
 	if err != nil {
 		return nil, err
 	}
@@ -231,8 +244,8 @@ func (c *Client) updateQuestionIndex(ctx context.Context, questionHash, question
 	return c.Cache.Set(ctx, "question_index", updatedIndexData, time.Hour*24*30) // Cache for 30 days
 }
 
-func (c *Client) makeAPICall(ctx context.Context, question string) (*PredictResponse, error) {
-	reqBody := PredictRequest{Question: question}
+func (c *Client) makeAPICall(ctx context.Context, question string, chatHistory []ChatMessage) (*PredictResponse, error) {
+	reqBody := PredictRequest{Question: question, ChatHistory: chatHistory}
 	jsonBody, err := json.Marshal(reqBody)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling request body: %v", err)
