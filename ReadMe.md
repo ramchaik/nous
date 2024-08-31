@@ -38,7 +38,7 @@ Nous consists of two main services:
    - Utilizes Redis for query caching
    - Implements Levenshtein distance for efficient string matching on recent queries
 
-##  🧠 CRAG Architecture
+##  🧠 CRAG Workflow
 ![CRAG workflow](docs/crag-architecture.png)
 
 ## 📁 Project Structure
