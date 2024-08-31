@@ -3,6 +3,9 @@
 Nous is an open-source personal knowledge assistant that allows you to interact with your personal documents and text files using natural language. It's designed with a focus on privacy, security, and local processing. 
 
 ## Demo 🎥
+
+Note: For the demo, I personalized Nous using the Lord of the Rings Trilogy PDF.
+
 ![DEMO](docs/nous-demo.gif)
 
 
