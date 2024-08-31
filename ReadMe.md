@@ -1,6 +1,6 @@
 # Nous: Your Personal Knowledge Assistant 🧠💬
 
-Nous is an open-source personal knowledge assistant that allows you to interact with your personal documents and text files using natural language. It's designed with a focus on privacy, security, and local processing.
+Nous is an open-source personal knowledge assistant that allows you to interact with your personal documents and text files using natural language. It's designed with a focus on privacy, security, and local processing. 
 
 ## Demo 🎥
 ![DEMO](docs/nous-demo.gif)
@@ -55,6 +55,18 @@ Nous consists of two main services:
     ├── config.py
     └── ...
 ```
+
+## 🛠️ Tech Stack
+- **Local LLMs**: Phi3-mini, TinyLlama
+- **Vector Database**: FAISS
+- **Embedding Model**: Nomic
+- **Web Search**: Tavily
+- **Web Server**: Golang with Gin
+- **Frontend Rendering**: HTMX
+- **Cache**: Redis
+- **Database**: SQLite
+- **Workflow**: LangGraph, Langchain
+- **Communication with LLMs**: Ollama
 
 ## 🚀 Getting Started
 
@@ -128,6 +140,9 @@ After adding your links, restart the Flask app to ingest the new documents into 
 
 1. Add support for uploading links directly from the UI for ingestion into the vector store
 2. Implement source attribution in the chat UI for web sources to improve transparency
+3. Expand support to include more document formats such as Excel, Markdown, and LaTeX.
+4. Integrate additional LLMs for improved response diversity and quality.
+5. Introduce customizable workflows for specific use cases, such as study aids or meeting summaries.
 
 ## 💡 Why Nous?
 
