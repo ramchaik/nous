@@ -1,8 +1,10 @@
 package ui
 
 import (
+	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 
 	"nous/internal/llmclient"
 	"nous/internal/models"
@@ -36,13 +38,29 @@ func (h *ChatUIHandler) InitiateChat(c *gin.Context) {
 		return
 	}
 
+	// Optional
+	query := c.Query("query")
+
+	sessionIDEncoded := url.QueryEscape(sessionID)
+	urlEncoededQuery := url.QueryEscape(query)
+
 	chatID := store.GenerateUUID()
-	c.Redirect(http.StatusFound, "/chat/"+chatID+"?session_id="+sessionID)
+
+	fmt.Println("chatID:", chatID)
+	fmt.Println("sessionID: ", sessionID)
+	fmt.Println("query(encoded): ", urlEncoededQuery)
+
+	c.Redirect(http.StatusFound, "/chat/"+chatID+"?sid="+sessionIDEncoded+"&query="+urlEncoededQuery)
 }
 
 func (h *ChatUIHandler) RenderChatPage(c *gin.Context) {
 	chatID := c.Param("chat_id")
-	sessionID := c.Query("session_id")
+	sessionID := c.Query("sid")
+	query := c.Query("query")
+
+	fmt.Println("chatID:", chatID)
+	fmt.Println("sessionID: ", sessionID)
+	fmt.Println("query: ", query)
 
 	if sessionID == "" {
 		c.HTML(http.StatusBadRequest, "error.html", gin.H{"error": "Session ID is required"})
@@ -59,12 +77,13 @@ func (h *ChatUIHandler) RenderChatPage(c *gin.Context) {
 		"sessionID": sessionID,
 		"chatID":    chatID,
 		"chats":     chats,
+		"query":     query,
 	})
 }
 
 func (h *ChatUIHandler) HandleChatMessage(c *gin.Context) {
 	chatID := c.Param("chat_id")
-	sessionID := c.PostForm("sessionID")
+	sessionID := c.PostForm("sid")
 	query := c.PostForm("query")
 
 	if query == "" || sessionID == "" {
