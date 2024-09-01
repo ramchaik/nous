@@ -1,0 +1,77 @@
+version: '3.8'
+
+services:
+  ollama:
+    build:
+      context: .
+      dockerfile: Dockerfile.ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app_network
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - app_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  llm_service:
+    build:
+      context: ./llm_api
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    depends_on:
+      ollama:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    environment:
+      - REDIS_HOST=redis
+      - OLLAMA_HOST=http://ollama:11434
+    volumes:
+      - ./llm_api:/app
+    networks:
+      - app_network
+
+  golang_app:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - llm_service
+    environment:
+      - SERVER_ADDR=:8080
+      - LLM_BASE_URL=http://llm_service:5000
+      - REDIS_ADDR=redis:6379
+      - DATABASE_PATH=/app/data/nous.db
+      - STATIC_PATH=/app/static
+      - TEMPLATES_PATH=/app/templates/*
+    volumes:
+      - golang_app_data:/app/data
+    networks:
+      - app_network
+
+networks:
+  app_network:
+    driver: bridge
+
+volumes:
+  ollama_data:
+  golang_app_data:

@@ -8,6 +8,7 @@ def load_documents(urls):
     return [item for sublist in docs for item in sublist]
 
 def load_and_split_documents(urls):
+    print("Loading and splitting documents")
     docs_list = load_documents(urls)
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
     return text_splitter.split_documents(docs_list)

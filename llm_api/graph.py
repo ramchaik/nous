@@ -22,7 +22,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 doc_splits = load_and_split_documents(URLS)
-vectorstore = create_vectorstore(doc_splits)
+vectorstore = create_vectorstore(doc_splits, force_rebuild=False)
 retriever = create_retriever(vectorstore)
 
 llm = create_llm(model="phi3:mini")
@@ -79,7 +79,7 @@ def grade_documents(state: GraphState) -> GraphState:
 
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = [executor.submit(process_batch, documents[i:i+batch_size]) for i in range(0, len(documents), batch_size)]
-        
+
         for future in concurrent.futures.as_completed(futures):
             batch_scores = future.result()
             for doc, score in zip(documents, batch_scores):
@@ -88,7 +88,7 @@ def grade_documents(state: GraphState) -> GraphState:
                 else:
                     search_needed = True
 
-            if len(filtered_docs) >= 5: # Top 5 docs 
+            if len(filtered_docs) >= 5: # Top 5 docs
                 break
 
     state["documents"] = filtered_docs[:5]  # Limit to top 5 relevant documents

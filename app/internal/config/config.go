@@ -22,11 +22,18 @@ func Load() (*Config, error) {
 	exPath := filepath.Dir(ex)
 
 	return &Config{
-		StaticPath:    filepath.Join(exPath, "..", "static"),
-		TemplatesPath: filepath.Join(exPath, "..", "templates", "*"),
-		ServerAddr:    ":8080",
-		DatabasePath:  "./nous.db",
-		LLMBaseURL:    "http://localhost:5000",
-		RedisAddr:     "localhost:6379",
+		StaticPath:    getEnv("STATIC_PATH", filepath.Join(exPath, "..", "static")),
+		TemplatesPath: getEnv("TEMPLATES_PATH", filepath.Join(exPath, "..", "templates", "*")),
+		ServerAddr:    getEnv("SERVER_ADDR", ":8080"),
+		DatabasePath:  getEnv("DATABASE_PATH", "./nous.db"),
+		LLMBaseURL:    getEnv("LLM_BASE_URL", "http://localhost:5000"),
+		RedisAddr:     getEnv("REDIS_ADDR", "localhost:6379"),
 	}, nil
+}
+
+func getEnv(key, fallback string) string {
+	if value, exists := os.LookupEnv(key); exists {
+		return value
+	}
+	return fallback
 }

@@ -20,7 +20,8 @@ def create_vectorstore(documents: List[str], force_rebuild: bool = False) -> FAI
         # Create InMemoryDocstore from the loaded dictionary
         docstore = InMemoryDocstore(docstore_dict)
         
-        ollama_embeddings = OllamaEmbeddings(model="nomic-embed-text")
+        ollama_host = os.getenv('OLLAMA_HOST', 'http://localhost:11434')
+        ollama_embeddings = OllamaEmbeddings(model="nomic-embed-text", base_url=ollama_host)
         vectorstore = FAISS(
             embedding_function=ollama_embeddings,
             index=index,
@@ -30,7 +31,8 @@ def create_vectorstore(documents: List[str], force_rebuild: bool = False) -> FAI
         print("Loaded existing vectorstore from disk.")
     else:
         # Create new vectorstore
-        ollama_embeddings = OllamaEmbeddings(model="nomic-embed-text")
+        ollama_host = os.getenv('OLLAMA_HOST', 'http://localhost:11434')
+        ollama_embeddings = OllamaEmbeddings(model="nomic-embed-text", base_url=ollama_host)
         vectorstore = FAISS.from_documents(documents, ollama_embeddings)
         
         # Save the index, vectors, and index_to_docstore_id separately

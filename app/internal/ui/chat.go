@@ -1,7 +1,6 @@
 package ui
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"net/url"
@@ -46,10 +45,6 @@ func (h *ChatUIHandler) InitiateChat(c *gin.Context) {
 
 	chatID := store.GenerateUUID()
 
-	fmt.Println("chatID:", chatID)
-	fmt.Println("sessionID: ", sessionID)
-	fmt.Println("query(encoded): ", urlEncoededQuery)
-
 	c.Redirect(http.StatusFound, "/chat/"+chatID+"?sid="+sessionIDEncoded+"&query="+urlEncoededQuery)
 }
 
@@ -57,10 +52,6 @@ func (h *ChatUIHandler) RenderChatPage(c *gin.Context) {
 	chatID := c.Param("chat_id")
 	sessionID := c.Query("sid")
 	query := c.Query("query")
-
-	fmt.Println("chatID:", chatID)
-	fmt.Println("sessionID: ", sessionID)
-	fmt.Println("query: ", query)
 
 	if sessionID == "" {
 		c.HTML(http.StatusBadRequest, "error.html", gin.H{"error": "Session ID is required"})
