@@ -45,18 +45,41 @@ Nous consists of two main services:
 
 ```
 .
-├── app/                  # Golang HTTP server
-│   ├── cmd/
-│   ├── db/
-│   ├── internal/
-│   ├── static/
-│   └── templates/
-└── llm_api/              # Flask LLM service
-    ├── data/
-    ├── llm_env/
-    ├── app.py
-    ├── config.py
-    └── ...
+├── Dockerfile.ollama
+├── LICENSE
+├── ReadMe.md
+├── app                       # Golang HTTP server
+│   ├── Dockerfile
+│   ├── Makefile
+│   ├── cmd
+│   ├── db
+│   ├── go.mod
+│   ├── go.sum
+│   ├── internal
+│   ├── nous.db
+│   ├── static
+│   └── templates
+├── docker-compose.yml
+├── docs
+│   ├── crag-architecture.png
+│   ├── nous-architecture.png
+│   └── nous-demo.gif
+├── llm_api                   # Flask app; LLM service
+│   ├── Dockerfile
+│   ├── __pycache__
+│   ├── app.py
+│   ├── config.py
+│   ├── data
+│   ├── document_processor.py
+│   ├── embeddings.py
+│   ├── graph.py
+│   ├── llm.py
+│   ├── llm_env
+│   ├── main.py
+│   ├── prompts.py
+│   ├── requirements.txt
+│   └── retriever.py
+└── start-ollama.sh
 ```
 
 ## 🛠️ Tech Stack
@@ -75,12 +98,38 @@ Nous consists of two main services:
 
 ### Prerequisites
 
-- [Ollama](https://ollama.com/)
-- Python 3.12+
-- Go 1.22+
-- Redis
+- Docker and Docker Compose
+- [Ollama](https://ollama.com/) (for local development only)
 
-### Setup
+### Setup with Docker Compose
+
+1. Clone the repository:
+   ```
+   git clone https://github.com/ramchaik/nous.git
+   cd nous
+   ```
+
+2. Create a `.env` file in the **llm_api** directory with the following content:
+   ```
+   TAVILY_API_KEY=your_tavily_api_key_here
+   ```
+
+3. Run the entire setup with Docker Compose:
+   ```
+   docker-compose up --build
+   ```
+
+   This command will:
+   - Build and start the Ollama service
+   - Start a Redis container
+   - Build and start the LLM service (Flask app)
+   - Build and start the Golang app
+
+4. Access the Nous web interface at `http://localhost:8080`
+
+### Local Development Setup
+
+If you prefer to run the services locally for development:
 
 1. **Set up Ollama:**
    ```
@@ -89,17 +138,9 @@ Nous consists of two main services:
    ```
 
 2. **Start Redis server:**
-
-    Using Docker
    ```
    docker run --name redis -p 6379:6379 -d redis
    ```
-
-    Else if you're not running a container
-   ```
-   redis-server
-   ```
-   
 
 3. **Set up LLM service:**
    ```
@@ -120,7 +161,7 @@ Nous consists of two main services:
 
 To add your personal links for Nous to process:
 
-1. Open the `/llm_api/config.py` file.
+1. Open the `llm_api/config.py` file.
 2. Locate the `URLS` list in the file.
 3. Add your personal URLs to this list.
 4. Save the file and restart the Flask app for changes to take effect.
@@ -138,6 +179,29 @@ URLS = [
 
 After adding your links, restart the Flask app to ingest the new documents into the vector database.
 
+## Docker Compose Configuration
+
+The `docker-compose.yml` file in the root directory contains the following services:
+
+- `ollama`: Runs the Ollama service for local LLMs
+- `redis`: Provides caching capabilities
+- `llm_service`: The Flask app that manages LLM interactions
+- `golang_app`: The main web server written in Go
+
+To customize the setup, you can modify the `docker-compose.yml` file. For example, to change the exposed port of the Golang app:
+
+```yaml
+golang_app:
+  # ... other configurations ...
+  ports:
+    - "8081:8080"  # Change 8081 to your desired port
+```
+
+Remember to rebuild the services after making changes:
+
+```
+docker-compose up --build
+```
 
 ## 🔮 Future Enhancements
 
