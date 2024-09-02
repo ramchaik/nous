@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   ollama:
@@ -38,10 +38,7 @@ services:
     depends_on:
       ollama:
         condition: service_healthy
-      redis:
-        condition: service_started
     environment:
-      - REDIS_HOST=redis
       - OLLAMA_HOST=http://ollama:11434
     volumes:
       - ./llm_api:/app
@@ -55,16 +52,21 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - llm_service
+      llm_service:
+        condition: service_started
+      redis:
+        condition: service_healthy
     environment:
       - SERVER_ADDR=:8080
       - LLM_BASE_URL=http://llm_service:5000
       - REDIS_ADDR=redis:6379
       - DATABASE_PATH=/app/data/nous.db
       - STATIC_PATH=/app/static
-      - TEMPLATES_PATH=/app/templates/*
+      - TEMPLATES_PATH=/app/templates
     volumes:
       - golang_app_data:/app/data
+      - ./app/static:/app/static
+      - ./app/templates:/app/templates
     networks:
       - app_network
 
