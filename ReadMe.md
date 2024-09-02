@@ -1,6 +1,6 @@
 # Nous: Your Personal Knowledge Assistant 🧠💬
 
-Nous is an open-source personal knowledge assistant that allows you to interact with your personal documents and text files using natural language. It's designed with a focus on privacy, security, and local processing. 
+Nous is an open-source personal knowledge assistant that allows you to interact with your personal documents and text files using natural language. It's designed with a focus on privacy, security, and local processing.
 
 ## Demo 🎥
 
@@ -178,6 +178,124 @@ URLS = [
 ```
 
 After adding your links, restart the Flask app to ingest the new documents into the vector database.
+
+## 🔧 Configuration
+
+Nous uses two main configuration files: one for the Golang HTTP server and another for the Python Flask LLM service.
+
+### Golang HTTP Server Configuration
+
+Located at: `app/internal/config/config.go`
+
+The Golang server configuration manages various aspects of the web server, including paths, addresses, and connections.
+
+#### Configuration Structure
+
+```go
+type Config struct {
+    StaticPath    string
+    TemplatesPath string
+    ServerAddr    string
+    DatabasePath  string
+    LLMBaseURL    string
+    RedisAddr     string
+}
+```
+
+#### Configuration Options
+
+- `StaticPath`: Path to static files (default: `"../static"` relative to the executable)
+- `TemplatesPath`: Path to HTML templates (default: `"../templates/*"` relative to the executable)
+- `ServerAddr`: Address and port for the HTTP server (default: `:8080`)
+- `DatabasePath`: Path to the SQLite database file (default: `"./nous.db"`)
+- `LLMBaseURL`: URL of the LLM service (default: `"http://localhost:5000"`)
+- `RedisAddr`: Address of the Redis server (default: `"localhost:6379"`)
+
+#### Customizing the Configuration
+
+You can customize these settings using environment variables:
+
+1. `STATIC_PATH`: Set the path to static files
+2. `TEMPLATES_PATH`: Set the path to HTML templates
+3. `SERVER_ADDR`: Set the server address and port
+4. `DATABASE_PATH`: Set the path to the SQLite database file
+5. `LLM_BASE_URL`: Set the URL of the LLM service
+6. `REDIS_ADDR`: Set the address of the Redis server
+
+Example:
+```bash
+export SERVER_ADDR=:8081
+```
+
+### LLM Service Configuration
+
+Located at: `llm_api/config.py`
+
+The LLM service configuration controls the behavior of the Flask app that manages LLM interactions.
+
+#### Configuration Options
+
+1. **API Keys**
+   ```python
+   TAVILY_API_KEY = os.getenv("TAVILY_API_KEY")
+   ```
+   - Used for web search capabilities. Set this in your `.env` file.
+
+2. **Vectorstore Paths**
+   ```python
+   DATA_INDEX_PATH = os.getenv('DATA_INDEX_PATH', "data/faiss_index.bin")
+   DATA_VECTOR_PATH = os.getenv('DATA_VECTOR_PATH', "data/vectors.npy")
+   DATA_INDEX_TO_ID_PATH = os.getenv('DATA_INDEX_TO_ID_PATH', "data/index_to_id.npy")
+   ```
+   - Determine where vectorstore data is saved and loaded from.
+
+3. **Ollama Configuration**
+   ```python
+   class OllamaConfig:
+       HOST = os.getenv('OLLAMA_HOST', 'http://localhost:11434')
+       EMBEDDINGS_MODEL = os.getenv('OLLAMA_EMBEDDINGS_MODEL', "nomic-embed-text")
+       MODEL_RAG = os.getenv('OLLAMA_MODEL_RAG', "phi3:mini")
+       MODEL_RETRIEVER_GRADER = os.getenv('OLLAMA_MODEL_RETRIEVER_GRADER', "thinyllama:mini")
+   ```
+   - `HOST`: URL where Ollama is running
+   - `EMBEDDINGS_MODEL`: Model for generating embeddings
+   - `MODEL_RAG`: Model for Retrieval-Augmented Generation
+   - `MODEL_RETRIEVER_GRADER`: Model for grading retrieval results
+
+4. **Personal Knowledge Base Resources**
+   ```python
+   KNOWLEDGE_BASE_URLS = [
+       "https://tip.golang.org/tour/concurrency.article",
+       "https://tip.golang.org/doc/effective_go",
+       "https://gosafir.com/mag/wp-content/uploads/2019/12/Tolkien-J.-The-lord-of-the-rings-HarperCollins-ebooks-2010.pdf",
+       "https://gist.github.com/silver-xu/1dcceaa14c4f0253d9637d4811948437",
+   ]
+   ```
+   - List of URLs for documents to be ingested into the knowledge base.
+
+#### Customizing the Configuration
+
+To modify LLM service settings:
+
+1. Open `llm_api/config.py` in a text editor.
+2. Adjust values as needed.
+3. For environment variables, either:
+   - Set them in your system environment, or
+   - Create a `.env` file in the `llm_api` directory with the required key-value pairs.
+4. Save the file and restart the LLM service.
+
+### Applying Configuration Changes
+
+After modifying any configuration:
+
+1. For the Golang server, rebuild and restart the server.
+2. For the LLM service, restart the Flask app.
+3. If using Docker, rebuild the containers:
+   ```bash
+   docker-compose up --build
+   ```
+
+This ensures that all configuration changes are properly incorporated into the running services.
 
 ## Docker Compose Configuration
 

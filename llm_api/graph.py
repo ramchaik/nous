@@ -7,7 +7,7 @@ import time
 import logging
 import concurrent.futures
 
-from config import TAVILY_API_KEY, URLS
+from config import OllamaConfig, TAVILY_API_KEY, KNOWLEDGE_BASE_URLS
 from document_processor import load_and_split_documents
 from embeddings import create_vectorstore
 from retriever import create_retriever
@@ -21,13 +21,13 @@ from langchain_community.tools.tavily_search import TavilySearchResults
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-doc_splits = load_and_split_documents(URLS)
+doc_splits = load_and_split_documents(KNOWLEDGE_BASE_URLS)
 vectorstore = create_vectorstore(doc_splits, force_rebuild=False)
 retriever = create_retriever(vectorstore)
 
-llm = create_llm(model="phi3:mini")
+llm = create_llm(model=OllamaConfig.MODEL_RAG)
 rag_chain = rag_prompt | llm | StrOutputParser()
-retrieval_grader = grading_prompt | create_llm(model="tinyllama", format="json") | JsonOutputParser()
+retrieval_grader = grading_prompt | create_llm(model=OllamaConfig.MODEL_RETRIEVER_GRADER, format="json") | JsonOutputParser()
 
 web_search_tool = TavilySearchResults(api_key=TAVILY_API_KEY)
 
