@@ -162,16 +162,14 @@ If you prefer to run the services locally for development:
 To add your personal links for Nous to process:
 
 1. Open the `llm_api/config.py` file.
-2. Locate the `URLS` list in the file.
+2. Locate the `KNOWLEDGE_BASE_URLS` list in the file.
 3. Add your personal URLs to this list.
 4. Save the file and restart the Flask app for changes to take effect.
 
 Example:
 
 ```python
-URLS = [
-    "https://tip.golang.org/tour/concurrency.article",
-    "https://tip.golang.org/doc/effective_go",
+KNOWLEDGE_BASE_URLS = [
     "https://your-personal-link.com/document.pdf",
     "https://another-personal-link.com/notes.txt"
 ]
@@ -265,10 +263,8 @@ The LLM service configuration controls the behavior of the Flask app that manage
 4. **Personal Knowledge Base Resources**
    ```python
    KNOWLEDGE_BASE_URLS = [
-       "https://tip.golang.org/tour/concurrency.article",
-       "https://tip.golang.org/doc/effective_go",
-       "https://gosafir.com/mag/wp-content/uploads/2019/12/Tolkien-J.-The-lord-of-the-rings-HarperCollins-ebooks-2010.pdf",
-       "https://gist.github.com/silver-xu/1dcceaa14c4f0253d9637d4811948437",
+       "https://your-personal-link.com/document.pdf",
+       "https://another-personal-link.com/notes.txt"
    ]
    ```
    - List of URLs for documents to be ingested into the knowledge base.
