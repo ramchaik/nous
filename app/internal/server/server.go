@@ -42,7 +42,6 @@ func (s *DefaultServer) SetupRoutes() {
 	s.router.Use(s.globalErrorHandler())
 
 	s.router.Static("/static", s.config.StaticPath)
-	s.router.LoadHTMLGlob(s.config.TemplatesPath)
 
 	chatStore := store.NewChatStore(s.db.GetDB())
 	chatAPIHandler := handlers.NewChatAPIHandler(chatStore, s.llmClient)

@@ -58,7 +58,6 @@ Nous consists of two main services:
 │   ├── internal
 │   ├── nous.db
 │   ├── static
-│   └── templates
 ├── docker-compose.yml
 ├── docs
 │   ├── crag-architecture.png
@@ -192,7 +191,6 @@ The Golang server configuration manages various aspects of the web server, inclu
 ```go
 type Config struct {
     StaticPath    string
-    TemplatesPath string
     ServerAddr    string
     DatabasePath  string
     LLMBaseURL    string
@@ -203,7 +201,6 @@ type Config struct {
 #### Configuration Options
 
 - `StaticPath`: Path to static files (default: `"../static"` relative to the executable)
-- `TemplatesPath`: Path to HTML templates (default: `"../templates/*"` relative to the executable)
 - `ServerAddr`: Address and port for the HTTP server (default: `:8080`)
 - `DatabasePath`: Path to the SQLite database file (default: `"./nous.db"`)
 - `LLMBaseURL`: URL of the LLM service (default: `"http://localhost:5000"`)
@@ -214,11 +211,10 @@ type Config struct {
 You can customize these settings using environment variables:
 
 1. `STATIC_PATH`: Set the path to static files
-2. `TEMPLATES_PATH`: Set the path to HTML templates
-3. `SERVER_ADDR`: Set the server address and port
-4. `DATABASE_PATH`: Set the path to the SQLite database file
-5. `LLM_BASE_URL`: Set the URL of the LLM service
-6. `REDIS_ADDR`: Set the address of the Redis server
+2. `SERVER_ADDR`: Set the server address and port
+3. `DATABASE_PATH`: Set the path to the SQLite database file
+4. `LLM_BASE_URL`: Set the URL of the LLM service
+5. `REDIS_ADDR`: Set the address of the Redis server
 
 Example:
 ```bash
