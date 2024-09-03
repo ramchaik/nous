@@ -141,3 +141,6 @@ yarn-error.log*
 
 **/tmp/**
 **/llm_env/**
+
+# Ignore Templ generated files
+app/internal/ui/components/*_templ.go
