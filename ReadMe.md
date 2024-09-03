@@ -87,7 +87,7 @@ Nous consists of two main services:
 - **Embedding Model**: Nomic
 - **Web Search**: Tavily
 - **Web Server**: Golang with Gin
-- **Frontend Rendering**: HTMX
+- **Frontend Rendering**: HTMX (with Go Templ)
 - **Cache**: Redis
 - **Database**: SQLite
 - **Workflow**: LangGraph, Langchain
