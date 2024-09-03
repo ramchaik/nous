@@ -8,6 +8,7 @@ import (
 	"nous/internal/llmclient"
 	"nous/internal/models"
 	"nous/internal/store"
+	"nous/internal/ui/components"
 
 	"github.com/gin-gonic/gin"
 )
@@ -33,16 +34,13 @@ func NewChatUIHandler(chatStore store.ChatStore, llmClient llmclient.LLMClient) 
 func (h *ChatUIHandler) InitiateChat(c *gin.Context) {
 	sessionID, err := h.getOrCreateSession(c)
 	if err != nil {
-		c.HTML(http.StatusInternalServerError, "error.html", gin.H{"error": "Failed to create session: " + err.Error()})
+		components.ErrorMessage("Failed to create session: "+err.Error()).Render(c, c.Writer)
 		return
 	}
 
-	// Optional
 	query := c.Query("query")
-
 	sessionIDEncoded := url.QueryEscape(sessionID)
 	urlEncoededQuery := url.QueryEscape(query)
-
 	chatID := store.GenerateUUID()
 
 	c.Redirect(http.StatusFound, "/chat/"+chatID+"?sid="+sessionIDEncoded+"&query="+urlEncoededQuery)
@@ -54,22 +52,17 @@ func (h *ChatUIHandler) RenderChatPage(c *gin.Context) {
 	query := c.Query("query")
 
 	if sessionID == "" {
-		c.HTML(http.StatusBadRequest, "error.html", gin.H{"error": "Session ID is required"})
+		components.ErrorMessage("Session ID is required").Render(c, c.Writer)
 		return
 	}
 
 	chats, err := h.chatStore.GetChatsBySession(sessionID)
 	if err != nil {
-		c.HTML(http.StatusInternalServerError, "error.html", gin.H{"error": "Failed to get chat history: " + err.Error()})
+		components.ErrorMessage("Failed to get chat history: "+err.Error()).Render(c, c.Writer)
 		return
 	}
 
-	c.HTML(http.StatusOK, "chat.html", gin.H{
-		"sessionID": sessionID,
-		"chatID":    chatID,
-		"chats":     chats,
-		"query":     query,
-	})
+	components.ChatPage(sessionID, chatID, chats, query).Render(c, c.Writer)
 }
 
 func (h *ChatUIHandler) HandleChatMessage(c *gin.Context) {
@@ -78,7 +71,7 @@ func (h *ChatUIHandler) HandleChatMessage(c *gin.Context) {
 	query := c.PostForm("query")
 
 	if query == "" || sessionID == "" {
-		c.HTML(http.StatusBadRequest, "error.html", gin.H{"error": "Query and sessionID are required"})
+		components.ErrorMessage("Query and sessionID are required").Render(c, c.Writer)
 		return
 	}
 
@@ -92,7 +85,7 @@ func (h *ChatUIHandler) HandleChatMessage(c *gin.Context) {
 	err := h.chatStore.CreateChat(userChat)
 	if err != nil {
 		log.Println("Failed to save user message:", err)
-		c.HTML(http.StatusInternalServerError, "error.html", gin.H{"error": "Failed to save user message:" + err.Error()})
+		components.ErrorMessage("Failed to save user message:"+err.Error()).Render(c, c.Writer)
 		return
 	}
 
@@ -100,7 +93,7 @@ func (h *ChatUIHandler) HandleChatMessage(c *gin.Context) {
 	chatHistory, err := h.chatStore.GetChatsBySession(sessionID)
 	if err != nil {
 		log.Println("Failed to get chat history:", err)
-		c.HTML(http.StatusInternalServerError, "error.html", gin.H{"error": "Failed to get chat history:" + err.Error()})
+		components.ErrorMessage("Failed to get chat history:"+err.Error()).Render(c, c.Writer)
 		return
 	}
 
@@ -116,7 +109,7 @@ func (h *ChatUIHandler) HandleChatMessage(c *gin.Context) {
 	// Get prediction from LLM
 	predictResp, err := h.llmClient.Predict(c.Request.Context(), query, llmChatHistory)
 	if err != nil {
-		c.HTML(http.StatusInternalServerError, "error.html", gin.H{"error": "Failed to get prediction:" + err.Error()})
+		components.ErrorMessage("Failed to get prediction:"+err.Error()).Render(c, c.Writer)
 		return
 	}
 
@@ -129,14 +122,11 @@ func (h *ChatUIHandler) HandleChatMessage(c *gin.Context) {
 	}
 	err = h.chatStore.CreateChat(botChat)
 	if err != nil {
-		c.HTML(http.StatusInternalServerError, "error.html", gin.H{"error": "Failed to save bot message:" + err.Error()})
+		components.ErrorMessage("Failed to save bot message:"+err.Error()).Render(c, c.Writer)
 		return
 	}
 
-	c.HTML(http.StatusOK, "chat_messages.html", gin.H{
-		"userMessage": query,
-		"botResponse": predictResp.Response,
-	})
+	components.ChatMessages(query, predictResp.Response).Render(c, c.Writer)
 }
 
 func (h *ChatUIHandler) getOrCreateSession(c *gin.Context) (string, error) {

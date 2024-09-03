@@ -1,0 +1,60 @@
+package components
+
+templ BaseLayout(title string) {
+	<!DOCTYPE html>
+	<html lang="en" class="dark">
+		<head>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<title>{ title }</title>
+			<script src="https://cdnjs.cloudflare.com/ajax/libs/htmx/1.9.6/htmx.min.js"></script>
+			<script src="https://cdn.tailwindcss.com"></script>
+			<script>
+                tailwind.config = {
+                    darkMode: "class",
+                    theme: {
+                        extend: {
+                            colors: {
+                                primary: {
+                                    50: "#f0f9ff",
+                                    100: "#e0f2fe",
+                                    200: "#bae6fd",
+                                    300: "#7dd3fc",
+                                    400: "#38bdf8",
+                                    500: "#0ea5e9",
+                                    600: "#0284c7",
+                                    700: "#0369a1",
+                                    800: "#075985",
+                                    900: "#0c4a6e",
+                                    950: "#082f49",
+                                },
+                            },
+                        },
+                    },
+                };
+            </script>
+		</head>
+		<body class="bg-gray-900 text-gray-100 min-h-screen flex flex-col">
+			<header class="bg-gray-800 py-4">
+				<div class="container mx-auto px-4">
+					<h1 class="text-2xl font-bold text-center text-primary-300">
+						<a href="/">Nous </a>
+					</h1>
+				</div>
+			</header>
+			<main class="flex-grow container mx-auto px-4 py-8 flex flex-col relative">
+				{ children... }
+			</main>
+			<footer class="bg-gray-800 py-3">
+				<div class="container mx-auto px-4">
+					<p class="text-center text-gray-400 text-sm">
+						&copy; <span id="current-year"></span> Nous. All rights reserved.
+					</p>
+				</div>
+			</footer>
+			<script>
+                document.getElementById("current-year").textContent = new Date().getFullYear();
+            </script>
+		</body>
+	</html>
+}
